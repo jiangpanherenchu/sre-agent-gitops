@@ -11,16 +11,25 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels: { app: ollama }
+    matchLabels:
+      app: ollama
   template:
     metadata:
-      labels: { app: ollama }
+      labels:
+        app: ollama
     spec:
       containers:
       - name: ollama
         image: ollama/ollama:latest
         ports:
         - containerPort: 11434
+        volumeMounts:
+        - name: ollama-data
+          mountPath: /root/.ollama
+      volumes:
+      - name: ollama-data
+        persistentVolumeClaim:
+          claimName: ollama-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -29,7 +38,8 @@ metadata:
   namespace: ai-services
 spec:
   type: NodePort
-  selector: { app: ollama }
+  selector:
+    app: ollama
   ports:
   - port: 11434
     targetPort: 11434
